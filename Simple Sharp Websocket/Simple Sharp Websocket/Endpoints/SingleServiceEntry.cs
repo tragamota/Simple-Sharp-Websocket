@@ -7,10 +7,10 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
-namespace SimpleWebsocket.Server.Entrypoints {
+namespace SimpleWebsocket.Server.Endpoints {
     public sealed class SingleServiceEntry : ServiceEntryPoint {
         private Thread OnConnectThread, HeaderParserThread;
-        private List<TcpClient> ConnectingClients;
+        private List<TcpClient> unhandeldClients;
         public SingleServiceEntry(IPAddress address, int port) : base(address, port) {
 
         }
@@ -19,6 +19,9 @@ namespace SimpleWebsocket.Server.Entrypoints {
             bool started = Start();
             OnConnectThread = new Thread(() => OnConnect());
             HeaderParserThread = new Thread(() => ParseHeader());
+
+            OnConnectThread.Start();
+            HeaderParserThread.Start();
 
             return started;
         }
@@ -35,7 +38,7 @@ namespace SimpleWebsocket.Server.Entrypoints {
         protected override void OnConnect() {
             while(Active) {
                 if(EntryTcpListener.Pending() && Active) {
-                    ConnectingClients.Add(EntryTcpListener.AcceptTcpClient());
+                    unhandeldClients.Add(EntryTcpListener.AcceptTcpClient());
                 }
                 Thread.Yield();
             }

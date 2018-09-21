@@ -8,7 +8,7 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SimpleWebsocket.Server.Entrypoints {
+namespace SimpleWebsocket.Server.Endpoints {
     public abstract class TcpEntryPoint : EntryPoint {
         private X509Certificate2 serverCertificate;
 
@@ -29,11 +29,11 @@ namespace SimpleWebsocket.Server.Entrypoints {
             }
         }
 
-        public TcpEntryPoint(IPAddress address, int port) : base(address, port) {
+        protected TcpEntryPoint(IPAddress address, int port) : base(address, port) {
             EntryTcpListener = new TcpListener(EndPoint);
         }
 
-        public TcpEntryPoint(IPAddress address, int port, X509Certificate2 certificate) : base(address, port) {
+        protected TcpEntryPoint(IPAddress address, int port, X509Certificate2 certificate) : base(address, port) {
             EntryTcpListener = new TcpListener(EndPoint);
             ServerCertificate = certificate;
         }

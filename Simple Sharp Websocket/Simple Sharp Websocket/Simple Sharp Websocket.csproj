@@ -43,11 +43,11 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="EntryPoint.cs" />
-    <Compile Include="IEntryPoint.cs" />
-    <Compile Include="ServiceEntryPoint.cs" />
-    <Compile Include="SingleServiceEntry.cs" />
-    <Compile Include="TcpEntryPoint.cs" />
+    <Compile Include="Endpoints\EntryPoint.cs" />
+    <Compile Include="Endpoints\IEntryPoint.cs" />
+    <Compile Include="Endpoints\ServiceEntryPoint.cs" />
+    <Compile Include="Endpoints\SingleServiceEntry.cs" />
+    <Compile Include="Endpoints\TcpEntryPoint.cs" />
     <Compile Include="WebSocket.cs" />
     <Compile Include="IServerSocket.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

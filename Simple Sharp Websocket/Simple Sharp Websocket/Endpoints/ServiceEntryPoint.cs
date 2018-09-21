@@ -6,10 +6,11 @@ using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace SimpleWebsocket.Server.Entrypoints {
+namespace SimpleWebsocket.Server.Endpoints {
     public abstract class ServiceEntryPoint : TcpEntryPoint {
         #region Variables
         protected List<int> headerParsers;
+        
         #endregion
 
         #region 
@@ -18,7 +19,7 @@ namespace SimpleWebsocket.Server.Entrypoints {
         }
         #endregion
 
-        public ServiceEntryPoint(IPAddress address, int port) : base(address, port) {
+        internal ServiceEntryPoint(IPAddress address, int port) : base(address, port) {
             headerParsers = new List<int>(20);
         }
 
