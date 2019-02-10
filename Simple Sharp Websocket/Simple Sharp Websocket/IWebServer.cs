@@ -6,10 +6,10 @@ using System.Threading.Tasks;
 
 namespace SimpleWebsocket.Server
 {
-    interface IServerSocket {
+    public interface IWebServer {
         bool Start();
-        Task<bool> StartAsync();
         void Stop();
+        Task<bool> StartAsync();
         Task StopAsync();
     }
 }
