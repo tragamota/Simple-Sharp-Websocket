@@ -10,20 +10,39 @@ using System.Threading.Tasks;
 
 namespace SimpleWebsocket.Server.Endpoints {
     public sealed class ServiceEndPoint : EndPoint {
-        private readonly TcpListener TcpSocket;
-        private readonly Queue<TcpClient> IncomingClients;
-        private Thread OnConnectThread;
+        private TLSCertificate _serverCertificate;
+        public TLSCertificate ServerCertificate {
+            get { return _serverCertificate; }
+            set { if(!Active) _serverCertificate = value; }
+        }
+
+        private IList<IWebService> _services;
+        public IList<IWebService> Services { get; }
+          
+
+        private readonly TcpListener _tcpSocket;
+        private Task _onConnectTask;
 
         public ServiceEndPoint(IPAddress address, int port) : base(address, port) {
-            TcpSocket = new TcpListener(EndPointAddress);
-            IncomingClients = new Queue<TcpClient>(30);
+            _tcpSocket = new TcpListener(EndPointAddress);
+            _services = new List<IWebService>();
+        }
 
-            OnConnectThread = new Thread(OnConnect);
+        public void AddService(IWebService service)
+        {
+            _services.Add(service);
+        }
+        
+        public void RemoveService(IWebService service)
+        {
+            _services.Remove(service);
         }
 
         public override bool OnStart()
         {
-            return Start();
+            bool success = false;
+            Start(ref success);
+            return success;
         }
 
         public override void OnStop()
@@ -31,96 +50,46 @@ namespace SimpleWebsocket.Server.Endpoints {
             Stop();
         }
 
-        protected async override void OnConnect()
+        protected override void Start(ref bool success)
         {
-            while(Active)
-            {
-                TcpClient client = await TcpSocket.AcceptTcpClientAsync();
-                Console.WriteLine("Nieuw verbinding");
-
-                MemoryStream bufferStream = new MemoryStream(1024);
-                bufferStream.
-
-                Task task = Task.Run(async() =>
-                {
-                    byte[] buffer = new byte[1024];
-                    int startPosition = 0;
-                    int readBytes = 0;
-                    NetworkStream stream = client.GetStream();
-                    bool connected = true;
-                    while (connected)
-                    { 
-                        try {
-                            readBytes = await stream.ReadAsync(buffer, startPosition, 1024 - startPosition);
-                            startPosition += readBytes;
-
-                            if(readBytes == 0)
-                            {
-                                connected = false;
-                            }
-                        }
-                        catch(IOException e)
-                        {
-                            Console.WriteLine(e.StackTrace);
-                        }
-
-
-
-                        Console.WriteLine(Encoding.UTF8.GetString(buffer, 0, startPosition));
-                        if (startPosition > 0)
-                        {
-                            await stream.WriteAsync(Encoding.UTF8.GetBytes($@"HTTP/1.1 200 OK\r\n<html>
-<head>
-<title>
-A Simple HTML Document
-</title>
-</head>
-<body>
-<p>This is a very simple HTML document</p>
-<p>It only has two paragraphs</p>
-</body>
-</html>"), 0, Encoding.UTF8.GetBytes($@"HTTP/1.1 200 OK\r\n<html>
-<head>
-<title>
-A Simple HTML Document
-</title>
-</head>
-<body>
-<p>This is a very simple HTML document</p>
-<p>It only has two paragraphs</p>
-</body>
-</html>").Length);
-                            client.Close();
-                        }
-                       
-                        //Console.WriteLine(client.Connected);
-                        //Console.WriteLine(startPosition);
-                    }
-                    
-                    Console.WriteLine("Closed connection :)");
-                });
-            }
-        }
-
-        protected override bool Start()
-        {
-            bool success = false;
             if (!Active)
             {
                 Active = true;
                 success = true;
-                TcpSocket.Start();
-                OnConnectThread.Start();
+                _tcpSocket.Start();
+                _onConnectTask = Task.Run(() => OnConnect());
             }
-            return success;
         }
 
-        protected override void Stop()
+        protected async override void OnConnect()
+        {
+            List<BaseClient> clients = new List<BaseClient>();
+            while (Active)
+            {
+                try
+                {
+                    TcpClient client = await _tcpSocket.AcceptTcpClientAsync();
+
+                    BaseClient bClient = new BaseClient(ref client, ref _serverCertificate);
+                    clients.Add(bClient);
+                    Console.WriteLine(client.Client.LocalEndPoint);
+                    Console.WriteLine(client.ReceiveBufferSize);
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.Message);
+                    Console.WriteLine(ex.StackTrace);
+                }
+            }
+        }
+
+        protected async override void Stop()
         {
             if(Active)
             {
                 Active = false;
-                TcpSocket.Stop();
+                _tcpSocket.Stop();
+                await _onConnectTask;
             }
         }
     }

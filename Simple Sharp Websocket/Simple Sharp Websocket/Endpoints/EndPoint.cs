@@ -27,7 +27,7 @@ namespace SimpleWebsocket.Server.Endpoints {
         public abstract bool OnStart();
         public abstract void OnStop();
 
-        protected abstract bool Start();
+        protected abstract void Start(ref bool success);
         protected abstract void OnConnect();
         protected abstract void Stop();
         #endregion

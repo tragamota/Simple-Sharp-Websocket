@@ -12,8 +12,9 @@ namespace SimpleWebsocket.Server
     {
         #region Properties
         public bool Active { get; private set; }
-        public List<EndPoint> EntryPoints { get; private set; }
+        public IReadOnlyList<EndPoint> EndPoints { get { return _endPoints; } }
 
+        private List<EndPoint> _endPoints;
         //interface properties
         public int ActiveEndpoints { get; private set; }
         public int ActiveServices { get; private set; }
@@ -23,13 +24,13 @@ namespace SimpleWebsocket.Server
 
         public Webserver()
         {
-            EntryPoints = new List<EndPoint>(20);
+            _endPoints = new List<EndPoint>(10);
         }
 
         #region Methods
         public bool Start()
         {
-            if (EntryPoints.Any())
+            if (_endPoints.Any())
             {
                 Active = true;
                 StartEntryPoints();
@@ -45,10 +46,11 @@ namespace SimpleWebsocket.Server
         {
             if (Active)
             {
-                foreach (EndPoint endPoint in EntryPoints)
+                foreach (EndPoint endPoint in _endPoints)
                 {
                     endPoint.OnStop();
                 }
+                Active = false;
             }
         }
 
@@ -68,7 +70,7 @@ namespace SimpleWebsocket.Server
             {
                 if (!Active)
                 {
-                    EntryPoints.Add(endPoint);
+                    _endPoints.Add(endPoint);
                     TotalEndpoints++;
                 }
             }
@@ -80,7 +82,7 @@ namespace SimpleWebsocket.Server
             {
                 if (!Active)
                 {
-                    EntryPoints.Remove(endPoint);
+                    _endPoints.Remove(endPoint);
                     TotalEndpoints--;
                 }
             }
@@ -90,7 +92,7 @@ namespace SimpleWebsocket.Server
         {
             ActiveEndpoints = await Task.Run(() => {
                 int activeEntryPoints = 0;
-                foreach (EndPoint entry in EntryPoints)
+                foreach (EndPoint entry in _endPoints)
                 {
                     if(entry.OnStart())
                     {
@@ -108,7 +110,7 @@ namespace SimpleWebsocket.Server
             infoBuilder.AppendLine("This webserver contains " + TotalEndpoints + " Endpoints");
             infoBuilder.AppendLine("There are at the moment " + ActiveServices + "/" + TotalServices + " running\n\n");
 
-            foreach (EndPoint endPoint in EntryPoints)
+            foreach (EndPoint endPoint in _endPoints)
             {
 
             }

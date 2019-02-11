@@ -46,11 +46,14 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BaseClient.cs" />
     <Compile Include="Endpoints\EndPoint.cs" />
     <Compile Include="Endpoints\IEndPoint.cs" />
+    <Compile Include="Endpoints\IWebService.cs" />
     <Compile Include="Endpoints\ServiceEndPoint.cs" />
     <Compile Include="IOnInfo.cs" />
     <Compile Include="IWebServerStatistics.cs" />
+    <Compile Include="TLSCertificate.cs" />
     <Compile Include="WebServer.cs" />
     <Compile Include="IWebServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
