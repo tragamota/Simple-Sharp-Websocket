@@ -24,35 +24,11 @@ namespace UnitTest {
             };
             server.AddEntryPoint(endpoint);
 
-
             await server.StartAsync();
-
-
-            //new Thread(async () =>
-            //{
-            //    TcpClient client = new TcpClient();
-
-            //    client.Connect("192.168.0.29", 80);
-            //    NetworkStream stream = client.GetStream();
-
-            //    while (true)
-            //    {
-            //        for (int i = 0; i < 20; i++)
-            //        {
-            //            await stream.WriteAsync(Encoding.UTF8.GetBytes("LMAO"), 0, Encoding.UTF8.GetBytes("LMAO").Length);
-            //        }
-            //        break;
-            //    }
-
-            //    await Task.Delay(30 * 1000);
-            //    Console.WriteLine("stopping socket");
-            //    client.Close();
-            //}).Start();
 
             while(server.Active)
             {
-                string console = Console.ReadLine().ToLower().Trim();
-                switch(console)
+                switch(Console.ReadLine().ToLower().Trim())
                 {
                     case "info":
                         server.PrintInfo();

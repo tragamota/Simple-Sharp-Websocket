@@ -9,9 +9,10 @@ using System.Threading.Tasks;
 
 namespace SimpleWebsocket
 {
-    public class BaseClient
+    public class BaseClient : IBaseClient
     {
         public bool Connected { get; private set; }
+        public bool Secure { get; private set; }
         private readonly int _initialMemorySize = 4096;
         private readonly int _readSize = 8192;
         private readonly int _writeSize = 4096;
@@ -30,7 +31,7 @@ namespace SimpleWebsocket
             _incomingDataStream = new MemoryStream(_initialMemorySize);
             _outgoingDataStream = new MemoryStream(_initialMemorySize);
 
-            if(certificate != null)
+            if (certificate != null)
             {
                 _clientConnectionStream = new SslStream(_clientSocket.GetStream(), false);
                 ValidateServerCertificate(ref certificate);
@@ -44,7 +45,7 @@ namespace SimpleWebsocket
             _onWriteTask = NetworkWriteTask();
         }
 
-        private void ValidateServerCertificate(ref TLSCertificate certificate) 
+        private void ValidateServerCertificate(ref TLSCertificate certificate)
         {
             SslStream authenticationStream = (SslStream)_clientConnectionStream;
             authenticationStream.AuthenticateAsServer(certificate.Certificate, false, false);
@@ -52,25 +53,29 @@ namespace SimpleWebsocket
 
         private Task NetworkReadTask()
         {
-            return Task.Run(async () => {
-                byte[] buffer = new byte[_readSize]; 
+            return Task.Run(async () =>
+            {
+                byte[] buffer = new byte[_readSize];
                 while (Connected)
                 {
                     int readBytes = await _clientConnectionStream.ReadAsync(buffer, 0, buffer.Length);
-                    Console.WriteLine(Encoding.UTF8.GetString(buffer, 0, readBytes));
-                    if (readBytes > 0) {
+                    bool hasData = readBytes != 0;
+
+                    if (hasData)
+                    {
                         await _incomingDataStream.WriteAsync(buffer, 0, readBytes);
+                        Console.WriteLine(_incomingDataStream.Length + "\t" + _incomingDataStream.Position);
+                        await _incomingDataStream.ReadAsync(buffer, 0, buffer.Length);
+                        Console.WriteLine(_incomingDataStream.Length + "\t" + _incomingDataStream.Position);
+                        await _incomingDataStream.FlushAsync();
+                        Console.WriteLine(_incomingDataStream.Length + "\t" + _incomingDataStream.Position);
                     }
                     else
                     {
                         Connected = false;
-                        continue;
+                        Close();
                     }
                 }
-               
-                Console.WriteLine("Closing Task " + Task.CurrentId);
-                _incomingDataStream.Close();
-                _clientSocket.Close();
             });
         }
 
@@ -82,25 +87,67 @@ namespace SimpleWebsocket
                 while (Connected)
                 {
                     int readBytes = await _outgoingDataStream.ReadAsync(writeBuffer, 0, writeBuffer.Length);
-                    
-                    if(readBytes > 0) {
+                    bool hasData = readBytes != 0;
+
+                    if (hasData)
+                    {
                         try
                         {
                             await _clientConnectionStream.WriteAsync(writeBuffer, 0, readBytes);
                         }
                         catch (Exception ex)
                         {
-                            Connected = false;
                             Console.WriteLine(ex.Message);
+                            Close();
                         }
                     }
-                    else
+                    await Task.Yield();
+                    await Task.Delay(100);
+                }
+            });
+        }
+
+        public byte[] Read()
+        {
+            byte[] buffer = new byte[0];
+            while (Connected)
+            {
+                try
+                {
+                    if (_incomingDataStream.Length > 0)
                     {
-                        await Task.Delay(100);
+                        buffer = new byte[_incomingDataStream.Length];
+                        _incomingDataStream.Read(buffer, 0, buffer.Length);
+                        break;
                     }
                 }
-                _outgoingDataStream.Close();
-            });
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex.StackTrace);
+                }
+            }
+            return buffer;
+        }
+
+        public void Send(byte[] binaryData)
+        {
+            try
+            {
+                _outgoingDataStream.Write(binaryData, 0, binaryData.Length);
+            }
+            catch (IOException ex)
+            {
+                Console.WriteLine(ex.StackTrace);
+            }
+        }
+
+        public void Close()
+        {
+            Connected = false;
+            _outgoingDataStream.Close();
+            _incomingDataStream.Close();
+            _clientConnectionStream.Close();
+            _clientSocket.Close();
         }
     }
 }
