@@ -14,12 +14,13 @@ namespace SimpleWebsocket.Server
         public bool Active { get; private set; }
         public IReadOnlyList<EndPoint> EndPoints { get { return _endPoints; } }
 
-        private List<EndPoint> _endPoints;
         //interface properties
         public int ActiveEndpoints { get; private set; }
         public int ActiveServices { get; private set; }
         public int TotalEndpoints { get; private set; }
         public int TotalServices { get; private set; }
+
+        private List<EndPoint> _endPoints;
         #endregion
 
         public Webserver()
@@ -37,7 +38,7 @@ namespace SimpleWebsocket.Server
             }
             else
             {
-                throw new Exception("There are no endpoints are provided");
+                throw new Exception("There are no endpoints provided");
             }
             return Active;
         }

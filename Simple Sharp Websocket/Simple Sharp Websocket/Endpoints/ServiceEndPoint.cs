@@ -18,8 +18,7 @@ namespace SimpleWebsocket.Server.Endpoints {
 
         private IList<IWebService> _services;
         public IList<IWebService> Services { get; }
-          
-
+        
         private readonly TcpListener _tcpSocket;
         private Task _onConnectTask;
 
@@ -40,8 +39,7 @@ namespace SimpleWebsocket.Server.Endpoints {
 
         public override bool OnStart()
         {
-            bool success = false;
-            Start(ref success);
+            Start(out bool success);
             return success;
         }
 
@@ -50,8 +48,9 @@ namespace SimpleWebsocket.Server.Endpoints {
             Stop();
         }
 
-        protected override void Start(ref bool success)
+        protected override void Start(out bool success)
         {
+            success = false;
             if (!Active)
             {
                 Active = true;
@@ -63,22 +62,25 @@ namespace SimpleWebsocket.Server.Endpoints {
 
         protected async override void OnConnect()
         {
-            List<BaseClient> clients = new List<BaseClient>();
             while (Active)
             {
                 try
                 {
+                    Console.WriteLine("Waiting for new connection");
                     TcpClient client = await _tcpSocket.AcceptTcpClientAsync();
 
-                    BaseClient bClient = new BaseClient(ref client, ref _serverCertificate);
-                    clients.Add(bClient);
-                    Console.WriteLine(client.Client.LocalEndPoint);
-                    Console.WriteLine(client.ReceiveBufferSize);
+                    Task t = Task.Run(async () =>
+                    {
+                        HttpClient httpClient = new HttpClient(ref client, ref _serverCertificate);
+                        HttpRequest request = await httpClient.ReadHttpRequestAsync();
+
+                        
+                    });
+                    
                 }
-                catch (Exception ex)
+                catch (IOException e)
                 {
-                    Console.WriteLine(ex.Message);
-                    Console.WriteLine(ex.StackTrace);
+                    Console.WriteLine(e.Message);
                 }
             }
         }

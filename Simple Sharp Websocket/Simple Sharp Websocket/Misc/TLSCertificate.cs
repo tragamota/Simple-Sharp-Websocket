@@ -14,7 +14,7 @@ namespace SimpleWebsocket
     {
         public X509Certificate2 Certificate { get; private set; }
 
-        public TLSCertificate(String path, string password)
+        public TLSCertificate(string path, string password)
         {
             try
             {
@@ -40,7 +40,7 @@ namespace SimpleWebsocket
             }
         }
 
-        public static TLSCertificate Open(String path, string password)
+        public static TLSCertificate Open(string path, string password)
         {
             return new TLSCertificate(path, password);
         }

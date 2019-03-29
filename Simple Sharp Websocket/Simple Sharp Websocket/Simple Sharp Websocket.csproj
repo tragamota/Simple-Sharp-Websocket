@@ -35,6 +35,9 @@
   <PropertyGroup>
     <StartupObject />
   </PropertyGroup>
+  <PropertyGroup>
+    <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
@@ -46,18 +49,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="BaseClient.cs" />
+    <Compile Include="Client\BaseClient.cs" />
     <Compile Include="Endpoints\EndPoint.cs" />
+    <Compile Include="Response\HttpResponse.cs" />
     <Compile Include="Endpoints\IEndPoint.cs" />
-    <Compile Include="Endpoints\IWebService.cs" />
+    <Compile Include="Response\IWebService.cs" />
     <Compile Include="Endpoints\ServiceEndPoint.cs" />
-    <Compile Include="IBaseClient.cs" />
-    <Compile Include="IOnInfo.cs" />
-    <Compile Include="IWebServerStatistics.cs" />
-    <Compile Include="TLSCertificate.cs" />
-    <Compile Include="WebServer.cs" />
-    <Compile Include="IWebServer.cs" />
+    <Compile Include="Request\HttpRequest.cs" />
+    <Compile Include="Request\HttpRequestReader.cs" />
+    <Compile Include="Response\HttpRequestWriter.cs" />
+    <Compile Include="Misc\IOnInfo.cs" />
+    <Compile Include="Response\IResponse.cs" />
+    <Compile Include="Webserver\IWebServerStatistics.cs" />
+    <Compile Include="MimeType.cs" />
+    <Compile Include="Misc\TLSCertificate.cs" />
+    <Compile Include="Webserver\WebServer.cs" />
+    <Compile Include="Webserver\IWebServer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="WebServiceContainer.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -16,13 +16,16 @@ namespace UnitTest {
     class Program {
         private const string V = "info";
 
-        public static async Task Main(string[] args) {
+        public static async Task Main(string[] args) { 
             Webserver server = new Webserver();
             ServiceEndPoint endpoint = new ServiceEndPoint(IPAddress.Any, 80)
             {
                 //ServerCertificate = new TLSCertificate("find a chat.pfx", "AvansPassword")
             };
             server.AddEntryPoint(endpoint);
+            server.AddEntryPoint(new ServiceEndPoint(IPAddress.Any, 443) {
+                ServerCertificate = new TLSCertificate("find a chat.pfx", "AvansPassword")
+            });
 
             await server.StartAsync();
 
@@ -30,7 +33,7 @@ namespace UnitTest {
             {
                 switch(Console.ReadLine().ToLower().Trim())
                 {
-                    case "info":
+                    case V:
                         server.PrintInfo();
                         break;
                     case "stop":

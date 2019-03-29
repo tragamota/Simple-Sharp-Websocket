@@ -6,7 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace SimpleWebsocket.Server.Endpoints {
-    public interface IEndPoint {
+    interface IEndPoint {
         IPEndPoint EndPointAddress { get; }
         //TODO: EndPointSettings
 

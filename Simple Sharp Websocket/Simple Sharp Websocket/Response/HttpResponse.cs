@@ -1,6 +1,6 @@
 ﻿namespace SimpleWebsocket.Server.Endpoints
 {
-    public interface IWebService
+    internal class HttpResponse
     {
 
     }
