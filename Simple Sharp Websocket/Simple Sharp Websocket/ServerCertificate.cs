@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
@@ -26,7 +27,7 @@ namespace Simple_Sharp_Websocket
             {
                 await secureConnectionStream.AuthenticateAsServerAsync(_tlsCertificate);
             }
-            catch (AuthenticationException ex)
+            catch (Exception)
             {
                 secureConnectionStream = null;
             }
