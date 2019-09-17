@@ -78,11 +78,9 @@ namespace Simple_Sharp_Websocket
         {
             Stream connectionStream = Stream.Null;
             
-            socket.Blocking = false;
-            socket.DualMode = true;
             socket.NoDelay = true;
-            
-            connectionStream = new NetworkStream(socket, true);
+
+            connectionStream = new NetworkStream(socket, false);
 
             if (_listenerCertificate != null)
                 await _listenerCertificate.AuthenticateClientAsServer(connectionStream);
@@ -92,6 +90,7 @@ namespace Simple_Sharp_Websocket
 
         private void ProduceNewClientEvent(Socket socket, Stream socketStream)
         {
+            new SocketClient(socket, socketStream);
             OnClientEvent(this, new OnNewClientEventArgs()
             {
                 NewClient = new SocketClient(socket, socketStream)
