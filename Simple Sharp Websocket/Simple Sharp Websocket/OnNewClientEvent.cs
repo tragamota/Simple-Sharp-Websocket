@@ -5,6 +5,6 @@ namespace Simple_Sharp_Websocket
 {
     public class OnNewClientEventArgs : EventArgs
     {
-        public SocketClient NewClient { get; set; }
+        public NativeSocketClient NewClient { get; set; }
     }
 }

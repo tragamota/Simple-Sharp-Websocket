@@ -29,10 +29,9 @@ namespace Simple_Sharp_Websocket
 
         public SocketListener(EventHandler<OnNewClientEventArgs> onConnectHandler, ServerCertificate certificate)
         {
+            OnClientEvent = onConnectHandler;
             _listenerCertificate = certificate;
             _configurationTasks = new LinkedList<Task>();
-            OnClientEvent = onConnectHandler;
-
         }
 
         public void Start()
@@ -68,7 +67,7 @@ namespace Simple_Sharp_Websocket
         {
             Stream connectionStream = await ConfigureStream(socket);
 
-            if (connectionStream == Stream.Null) 
+            if (connectionStream == null) 
                 return;
             
             ProduceNewClientEvent(socket, connectionStream);
@@ -76,12 +75,10 @@ namespace Simple_Sharp_Websocket
 
         private async Task<Stream> ConfigureStream(Socket socket)
         {
-            Stream connectionStream = Stream.Null;
+            Stream connectionStream = new NetworkStream(socket, false);
             
             socket.NoDelay = true;
-
-            connectionStream = new NetworkStream(socket, false);
-
+            
             if (_listenerCertificate != null)
                 await _listenerCertificate.AuthenticateClientAsServer(connectionStream);
             
@@ -90,10 +87,9 @@ namespace Simple_Sharp_Websocket
 
         private void ProduceNewClientEvent(Socket socket, Stream socketStream)
         {
-            new SocketClient(socket, socketStream);
             OnClientEvent(this, new OnNewClientEventArgs()
             {
-                NewClient = new SocketClient(socket, socketStream)
+                NewClient = new NativeSocketClient(socket, socketStream)
             });
         }
 
@@ -101,7 +97,6 @@ namespace Simple_Sharp_Websocket
         {
             if (!_running)
                 return;
-
             
             _running = false;
             _cancellationSource.Cancel();

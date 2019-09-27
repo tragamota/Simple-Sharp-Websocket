@@ -3,10 +3,10 @@ using System.IO.Pipelines;
 
 namespace Simple_Sharp_Websocket
 {
-    public struct ConnectionPipe
+    public class ConnectionPipe
     {
-        public IDuplexPipe SocketPipe { get; }
-        public IDuplexPipe ApplicationPipe { get; }
+        public IDuplexPipe SocketPipe { get; private set; }
+        public IDuplexPipe ApplicationPipe { get; private set; }
 
         public ConnectionPipe(PipeOptions inputOptions = default, PipeOptions outputOptions = default)
         {
@@ -16,9 +16,10 @@ namespace Simple_Sharp_Websocket
             CreatePipelinePair(input, output);
         }
 
-        private void CreatePipelinePair(Pipe inputPipe, Pipe outputPipe)
+        private void CreatePipelinePair(in Pipe inputPipe, in Pipe outputPipe)
         {
-            TransportPipe SocketPipe =     
+            SocketPipe = new TransportPipe(outputPipe.Reader, inputPipe.Writer);
+            ApplicationPipe = new TransportPipe(inputPipe.Reader, outputPipe.Writer);
         }
     }
 }
